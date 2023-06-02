@@ -171,9 +171,10 @@ def send_block():
 
     # generate miner threads with random nonces
     threads = []
-    for i in range(50):
+    n = 20
+    for i in range(n):
         threads.append(Thread(target=miner,args=(nonce,transaction_list,ts)))
-        nonce += 85899345
+        nonce += 2**32 // n
 
     for thread in threads:
         thread.start()
