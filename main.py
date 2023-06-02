@@ -16,6 +16,7 @@ from jwt import (
 import time
 from threading import Thread,Lock, Condition
 import random
+import multiprocessing
 
 fingerprint = "85bbd17fbeaaad45aecba62fb974b1ac40eda237d3679b8f213309b32facc376"
 
@@ -31,10 +32,8 @@ bots = [
     "4319647f2ad81e83bf602692b32a082a6120c070b6fd4a1dbc589f16d37cbe1d",
     "f44f83688b33213c639bc16f9c167543568d4173d5f4fc7eb1256f6c7bb23b26",
     "a4d9a38a04d0aa7de7c29fef061a1a539e6a192ef75ea9730aff49f9bb029f99",
-    "9d453e55cd1367ecf122fee880991e29458651f3824cd9ea47b89e06158936e3",
     "e5ed590ed68523b68a869b74564d824f56728d8b29af8dd4dcf1049dfa93c2e2"
 ]
-bot_index = 0
 
 with open("gradecoin.pub","r") as f:
     gradecoin_public_key = f.read()
@@ -151,7 +150,7 @@ def send_transaction(target):
 def send_block():
     transaction_list = get_transactions()
     global bots
-    global bot_index
+    bot_index = random.randint(0,4)
     while len(transaction_list) < block_transaction_count:
         print("Not enough transactions to create a block: ",len(transaction_list))
         if len(transaction_list) == 0:
@@ -165,6 +164,8 @@ def send_block():
         transaction_list = transaction_list[:block_transaction_count]
     
     print("Starting to mine block")
+
+    print("Current process:",multiprocessing.current_process().pid)
 
     nonce = 0
     ts = datetime.now().isoformat()
@@ -223,6 +224,7 @@ def miner(nonce,transaction_list,ts):
         print("Error occurred:" + response["message"])
     else:
         print("Block mined")
+
 
 
 
