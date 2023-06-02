@@ -148,7 +148,8 @@ def send_transaction(target):
 
 def send_block():
     transaction_list = get_transactions()
-    
+    global bots
+    global bot_index
     while len(transaction_list) < block_transaction_count:
         print("Not enough transactions to create a block: ",len(transaction_list))
         if len(transaction_list) == 0:
