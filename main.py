@@ -208,20 +208,19 @@ def miner(nonce,transaction_list,ts):
         temp_s = json.dumps(temp).replace(" ","")
         #blake2s hash
         hash_val = hashlib.blake2s(temp_s.encode()).hexdigest()
-    
-    jwt_token = sign(payload)
+
 
     temp["hash"] = hash_val
     payload["tha"] = hash_val
 
-    response = requests.post("https://gradecoin.xyz/block",data=json.dumps(temp),headers={"Authorization":"Bearer "+jwt_token})
+    jwt_token = sign(payload)
 
-    print(response.text)
+    response = requests.post("https://gradecoin.xyz/block",data=json.dumps(temp),headers={"Authorization":"Bearer "+jwt_token})
 
     response = json.loads(response.text)
 
     if response["res"] == "Error":
-        print("Error occurred")
+        print("Error occurred:" + response["message"])
     else:
         print("Block mined")
 
