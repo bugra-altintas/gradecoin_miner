@@ -31,6 +31,8 @@ bots = [
     "4319647f2ad81e83bf602692b32a082a6120c070b6fd4a1dbc589f16d37cbe1d",
     "f44f83688b33213c639bc16f9c167543568d4173d5f4fc7eb1256f6c7bb23b26",
     "a4d9a38a04d0aa7de7c29fef061a1a539e6a192ef75ea9730aff49f9bb029f99",
+    "9d453e55cd1367ecf122fee880991e29458651f3824cd9ea47b89e06158936e3",
+    "e5ed590ed68523b68a869b74564d824f56728d8b29af8dd4dcf1049dfa93c2e2"
 ]
 bot_index = 0
 
@@ -176,12 +178,8 @@ def send_block():
     for thread in threads:
         thread.start()
 
-    # wait for a thread to find a valid nonce
-    with mutex:
-        while not stop_mining:
-            cv.wait()
-
-    exit(0)
+    for thread in threads:
+        thread.join()
 
 def miner(nonce,transaction_list,ts):
 
@@ -189,6 +187,12 @@ def miner(nonce,transaction_list,ts):
         "transaction_list":transaction_list,
         "nonce":nonce,
         "timestamp":ts
+    }
+
+    payload = {
+        "tha":"",
+        "iat":int(datetime.now().timestamp()),
+        "exp":int(datetime.now().timestamp())+3600
     }
 
     temp_s = json.dumps(temp).replace(" ","")
@@ -203,28 +207,22 @@ def miner(nonce,transaction_list,ts):
         temp_s = json.dumps(temp).replace(" ","")
         #blake2s hash
         hash_val = hashlib.blake2s(temp_s.encode()).hexdigest()
-    print("Block mined")
-    print(transaction_list)
-    print("Nonce: ",nonce)
-    print("Hash: ",hash_val)
-    print("Timestamp: ",ts)
-
-    payload = {
-        "tha":hash_val,
-        "iat":int(datetime.now().timestamp()),
-        "exp":int(datetime.now().timestamp())+3600
-    }
-
+    
     jwt_token = sign(payload)
 
     temp["hash"] = hash_val
+    payload["tha"] = hash_val
 
     response = requests.post("https://gradecoin.xyz/block",data=json.dumps(temp),headers={"Authorization":"Bearer "+jwt_token})
 
     print(response.text)
-    with mutex:
-        stop_mining = True
-        cv.notify_all()
+
+    response = json.loads(response.text)
+
+    if response["res"] == "Error":
+        print("Error occurred")
+    else:
+        print("Block mined")
 
 
 
