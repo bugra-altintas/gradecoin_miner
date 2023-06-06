@@ -231,6 +231,7 @@ def miner(nonce,transaction_list,ts):
 
 if __name__ == "__main__":
     get_config()
+    #send_transaction("f44f83688b33213c639bc16f9c167543568d4173d5f4fc7eb1256f6c7bb23b26")
     send_block()
 
 
